@@ -1,0 +1,667 @@
+<html lang="en">
+  <head>
+    <link
+      href="{{ url_for('static', filename= 'css/plotstyle.css') }}"
+      rel="stylesheet"
+      type="text/css"
+      media="all"
+    />
+    <!--<link href="{{ url_for('static', filename= 'css/style.css') }}" rel="stylesheet" type="text/css" media="all"> -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--<meta http-equiv="refresh" content="5">-->
+    <title>SMART DB STATUS</title>
+    <!-- HIGH CHART-->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <div class="alert_green">
+        <!-- <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> -->
+        {{ message }}
+      </div>
+      <script>
+        // Fade out the alert box after 3 seconds
+        setTimeout(function () {
+          var alertBox = document.querySelector(".alert_green");
+          alertBox.style.opacity = "0";
+          alertBox.style.transition = "opacity 1s ease-in-out";
+          setTimeout(function () {
+            alertBox.remove();
+          }, 1000);
+        }, 800);
+      </script>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+    <header class="header">
+      <p class="logo">MONJAY.J - SMART DISTRIBUTION BOARD</p>
+
+      <span style="display: flex; margin-right: 30px">
+        <!--DELETE ALL DATA-->
+        <form action="/delete" method="post">
+          <input
+            type="submit"
+            class="buttonstyle"
+            onclick="handleDelete()"
+            value="CLEAR ALL DATA"
+          />
+        </form>
+        <!-- LOGOUT -->
+        <form action="/logout" method="post">
+          <input type="submit" class="logout" value="LOGOUT" />
+        </form>
+      </span>
+    </header>
+
+    <!--HIGH CHART -->
+    <div class="jumbotron"></div>
+    <br />
+    <br />
+
+    <div class="container-fluid">
+      <div class="ctrl-container">
+        <h2 class="ctrl-header">Control Panel</h2>
+        <div style="display: flex; flex-direction: row; align-items: center">
+          <div class="ctrl-btn">
+            <div style="display: flex; margin-left: 190px; gap: 100px">
+              <p>Value</p>
+              <p style="margin-left: -30px">Set Range</p>
+            </div>
+            <div class="ctrl">
+              <p style="width: 130px">Channel 1</p>
+              <p class="ctrl-value" id="ctrl-value-1"></p>
+            </div>
+
+            <div class="ctrl">
+              <p style="width: 130px; line-height: 1.2em">Channel 2</p>
+              <p class="ctrl-value" id="ctrl-value-2"></p>
+            </div>
+
+            <div class="ctrl">
+              <p style="width: 130px; line-height: 1.2em">Channel 3</p>
+              <p class="ctrl-value" id="ctrl-value-3"></p>
+            </div>
+
+            <div class="ctrl">
+              <p style="width: 130px; line-height: 1.2em">Channel 4</p>
+              <p class="ctrl-value" id="ctrl-value-4"></p>
+            </div>
+          </div>
+
+          <div class="ctrl-form">
+            <input
+              type="number"
+              name="form-d1"
+              id="form-d1"
+              class="btn-input"
+            />
+
+            <div style="display: flex; align-items: center">
+              <input
+                type="number"
+                name="form-d2"
+                id="form-d2"
+                class="btn-input"
+              />
+              <button
+                style="margin-left: 20px"
+                class="ctrl-form-btn"
+                onclick="updateInput()"
+              >
+                Submit
+              </button>
+            </div>
+            <input
+              type="number"
+              name="form-d3"
+              id="form-d3"
+              class="btn-input"
+            />
+            <input
+              type="number"
+              name="form-d4"
+              id="form-d4"
+              class="btn-input"
+            />
+          </div>
+        </div>
+      </div>
+      {% for i in range(1, 5) %}
+      <div class="container">
+        <div style="display: flex; justify-content: space-between">
+          <button
+            class="form-button"
+            id="button-c{{ i }}"
+            onclick="updateState('c{{ i }}')"
+          ></button>
+          <button class="fault-button" onclick="avg('c{{ i }}')">
+            Average
+          </button>
+        </div>
+
+        <div id="c{{ i }}"></div>
+      </div>
+      {% endfor %}
+      <div id="v" class="container"></div>
+    </div>
+    <div style="margin-top: 20px; height: 10px"></div>
+  </body>
+  <script src="https://smtpjs.com/v3/smtp.js"></script>
+  <script>
+    function handleDelete() {
+      localStorage.clear();
+    }
+    let tempSent = false;
+    let shortOne = false;
+    let voltageSent = false;
+    let shortTwo = false;
+    let lineSent = false;
+    let shortThree = false;
+    let neutralSent = false;
+    let shortFour = false;
+
+    setInterval(() => {
+      // Create your own SMTPJS Account and insert the details here
+      // Also sort out the logic, if you want channel input to be lesser than DB reading.
+      fetch("/get_distribution_input")
+        .then((response) => response.text())
+        .then((distribution) => {
+          fetch("/data")
+            .then((response) => response.text())
+            .then((data) => {
+              data = data.split(", ");
+              distribution = distribution.split(", ");
+              console.log("distribution: ", distribution);
+              console.log("Data: ", data);
+
+              //CHANNEL 1
+              //Overload
+              if (data[1] > distribution[0] && !tempSent) {
+                console.log(`${distribution[0]} is less than ${data[1]}`);
+                alert("URGENT: Distribution Line Overload Detected(Channel 1)");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "smartdistributionboard10@gmail.com",
+                  //Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "smartdistributionboard10@gmail.com",
+                  Subject:
+                    "URGENT: Distribution Line Overload Detected(Channel 1)",
+                  Body: `
+                  Dear User,<br/>
+                        Our Smart Distribution Board has detected an overload on your distribution line, posing a high risk to your electrical system. Immediate action is necessary to prevent equipment damage and potential hazards.<br/>
+
+                        Steps to Take:<br/>
+
+                        Identify Overloaded Circuit(s)<br/>
+                        Disconnect Non-Essential Loads<br/>
+                        Distribute Load<br/>
+                        Seek Professional Assistance<br/>
+                        Please address this issue urgently. Once resolved, reply with the steps taken.<br/>
+
+                        Your safety is our priority. Contact our support team at [Contact Information] for further assistance.<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management<br/>`,
+                }).then((message) => alert(message));
+                tempSent = true;
+              } else if (data[1] <= distribution[0]) {
+                tempSent = false;
+              }
+
+              //Short Circuit
+              if (data[1] > 24 && !shortOne) {
+                //set constant value for short circuit here
+                console.log(`${distribution[0]} is less than ${data[1]}`);
+                alert("URGENT: Short Circuit Fault Detected on Distribution Line(Channel 1)");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "smartdistributionboard10@gmail.com",
+                  //Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "smartdistributionboard10@gmail.com",
+                  Subject:
+                    "URGENT: Short Circuit Fault Detected on Distribution Line(Channel 1)",
+                  Body: `
+                  Dear User,<br/>
+
+                  A short circuit fault has been detected on your distribution line, posing an immediate risk to your electrical system. Please take the following actions:<br/>
+
+                  Turn off power to the affected circuit.<br/>
+                  Identify and remove any faulty equipment.<br/>
+                  Repair or replace damaged wiring with professional assistance.<br/>
+                  Restore power only after the fault has been resolved.<br/>
+                  Your prompt attention to this matter is crucial for your safety. Please respond with the steps taken.<br/>
+
+                  For further assistance, contact our support team at [Contact Information].<br/><br/><br/>
+
+                  Sincerely,<br/>
+                  Smart Distribution Board Management
+                  `,
+                }).then((message) => alert(message));
+                shortOne = true;
+              } else if (data[1] <= distribution[0]) {
+                shortOne = false;
+              }
+
+              // CHANNEL 2
+              //Overloading Fault
+              if (data[2] > distribution[1] && !lineSent) {
+                console.log(`${distribution[1]} is less than ${data[2]}`);
+                alert("URGENT: Distribution Line Overload Detected(Channel 2)");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "omonjade.godsfavour@stu.cu.edu.ng",
+                  // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "omonjade.godsfavour@stu.cu.edu.ng",
+                  Subject: "URGENT: Distribution Line Overload Detected(Channel 2)",
+                  Body: ` Dear User,<br/>
+                        Our Smart Distribution Board has detected an overload on your distribution line, posing a high risk to your electrical system. Immediate action is necessary to prevent equipment damage and potential hazards.<br/>
+
+                        Steps to Take:<br/>
+
+                        Identify Overloaded Circuit(s)<br/>
+                        Disconnect Non-Essential Loads<br/>
+                        Distribute Load<br/>
+                        Seek Professional Assistance<br/>
+                        Please address this issue urgently. Once resolved, reply with the steps taken.<br/>
+
+                        Your safety is our priority. Contact our support team at [Contact Information] for further assistance.<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management<br/>`,
+                }).then((message) => alert(message));
+                lineSent = true;
+              } else if (data[2] <= distribution[1]) {
+                lineSent = false;
+              }
+
+              //Short Circuit
+              if (data[2] > distribution[1] && !shortTwo) {
+                console.log(`${distribution[1]} is less than ${data[2]}`);
+                alert("Channel 2 URGENT: Short Circuit Fault Detected on Distribution Line");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "omonjade.godsfavour@stu.cu.edu.ng",
+                  // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "omonjade.godsfavour@stu.cu.edu.ng",
+                  Subject: "Channel 2 URGENT: Short Circuit Fault Detected on Distribution Line",
+                  Body: `Dear User,<br/>
+
+                        A short circuit fault has been detected on your distribution line, posing an immediate risk to your electrical system. Please take the following actions:<br/>
+
+                        Turn off power to the affected circuit.<br/>
+                        Identify and remove any faulty equipment.<br/>
+                        Repair or replace damaged wiring with professional assistance.<br/>
+                        Restore power only after the fault has been resolved.<br/>
+                        Your prompt attention to this matter is crucial for your safety. Please respond with the steps taken.<br/>
+
+                        For further assistance, contact our support team at [Contact Information].<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management.`,
+                }).then((message) => alert(message));
+                shortTwo = true;
+              } else if (data[2] <= distribution[1]) {
+                shortTwo = false;
+              }
+
+              //CHANNEL 3
+              // Overloading Fault
+              if (data[3] > distribution[2] && !voltageSent) {
+                console.log(`${distribution[2]} is less than ${data[3]}`);
+                alert("URGENT: Distribution Line Overload Detected(Channel 3)");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "omonjade.godsfavour@stu.cu.edu.ng",
+                  // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "omonjade.godsfavour@stu.cu.edu.ng",
+                  Subject: "URGENT: Distribution Line Overload Detected(Channel 3)",
+                  Body: ` Dear User,<br/>
+                        Our Smart Distribution Board has detected an overload on your distribution line, posing a high risk to your electrical system. Immediate action is necessary to prevent equipment damage and potential hazards.<br/>
+
+                        Steps to Take:<br/>
+
+                        Identify Overloaded Circuit(s)<br/>
+                        Disconnect Non-Essential Loads<br/>
+                        Distribute Load<br/>
+                        Seek Professional Assistance<br/>
+                        Please address this issue urgently. Once resolved, reply with the steps taken.<br/>
+
+                        Your safety is our priority. Contact our support team at [Contact Information] for further assistance.<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management<br/>`,
+                }).then((message) => alert(message));
+                voltageSent = true;
+              } else if (data[3] <= distribution[2]) {
+                voltageSent = false;
+              }
+
+              // Short Circuit
+              if (data[3] > distribution[2] && !shortThree) {
+                console.log(`${distribution[2]} is less than ${data[3]}`);
+                alert("Channel 3 URGENT: Short Circuit Fault Detected on Distribution Line");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "omonjade.godsfavour@stu.cu.edu.ng",
+                  // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "omonjade.godsfavour@stu.cu.edu.ng",
+                  Subject: "Channel 3 URGENT: Short Circuit Fault Detected on Distribution Line",
+                  Body: `Dear User,<br/>
+
+                        A short circuit fault has been detected on your distribution line, posing an immediate risk to your electrical system. Please take the following actions:<br/>
+
+                        Turn off power to the affected circuit.<br/>
+                        Identify and remove any faulty equipment.<br/>
+                        Repair or replace damaged wiring with professional assistance.<br/>
+                        Restore power only after the fault has been resolved.<br/>
+                        Your prompt attention to this matter is crucial for your safety. Please respond with the steps taken.<br/>
+
+                        For further assistance, contact our support team at [Contact Information].<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management`,
+                }).then((message) => alert(message));
+                shortThree = true;
+              } else if (data[3] <= distribution[2]) {
+                shortThree = false;
+              }
+
+              //CHANNEL 4
+              //Overloading Fault
+              if (data[4] > distribution[3] && !neutralSent) {
+                console.log(`${distribution[3]} is less than ${data[4]}`);
+                alert("URGENT: Distribution Line Overload Detected(Channel 4)");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "omonjade.godsfavour@stu.cu.edu.ng",
+                  // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "omonjade.godsfavour@stu.cu.edu.ng",
+                  Subject: "URGENT: Distribution Line Overload Detected(Channel 4)",
+                  Body: ` Dear User,<br/>
+                        Our Smart Distribution Board has detected an overload on your distribution line, posing a high risk to your electrical system. Immediate action is necessary to prevent equipment damage and potential hazards.<br/>
+
+                        Steps to Take:<br/>
+
+                        Identify Overloaded Circuit(s)<br/>
+                        Disconnect Non-Essential Loads<br/>
+                        Distribute Load<br/>
+                        Seek Professional Assistance<br/>
+                        Please address this issue urgently. Once resolved, reply with the steps taken.<br/>
+
+                        Your safety is our priority. Contact our support team at [Contact Information] for further assistance.<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management<br/>`,
+                }).then((message) => alert(message));
+                neutralSent = true;
+              } else if (data[4] <= distribution[3]) {
+                neutralSent = false;
+              }
+
+              //Short Circuit
+              if (data[4] > distribution[3] && !shortFour) {
+                console.log(`${distribution[3]} is less than ${data[4]}`);
+                alert("Channel 4 URGENT: Short Circuit Fault Detected on Distribution Line");
+                Email.send({
+                  Host: "smtp.elasticemail.com",
+                  Username: "omonjade.godsfavour@stu.cu.edu.ng",
+                  // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+                  To: "omonjade7@gmail.com",
+                  From: "omonjade.godsfavour@stu.cu.edu.ng",
+                  Subject: "Channel 4 URGENT: Short Circuit Fault Detected on Distribution Line",
+                  Body: `Dear User,<br/>
+
+                        A short circuit fault has been detected on your distribution line, posing an immediate risk to your electrical system. Please take the following actions:<br/>
+
+                        Turn off power to the affected circuit.<br/>
+                        Identify and remove any faulty equipment.<br/>
+                        Repair or replace damaged wiring with professional assistance.<br/>
+                        Restore power only after the fault has been resolved.<br/>
+                        Your prompt attention to this matter is crucial for your safety. Please respond with the steps taken.<br/>
+
+                        For further assistance, contact our support team at [Contact Information].<br/><br/><br/>
+
+                        Sincerely,<br/>
+                        Smart Distribution Board Management`,
+                }).then((message) => alert(message));
+                shortFour = true;
+              } else if (data[4] <= distribution[3]) {
+                shortFour = false;
+              }
+            });
+        });
+    }, 1000); // Every 0.9 Seconds
+
+    for (let i = 1; i <= 4; i++) {
+      fetch(`/get_distribution_input/d${i}`)
+        .then((response) => response.text())
+        .then((data) => {
+          console.log("Value: ", data);
+          const value = document.getElementById(`ctrl-value-${i}`);
+          value.textContent = parseInt(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching value: ", error);
+        });
+    }
+
+    function updateInput() {
+      let b1 = document.getElementById("form-d1").value;
+      let b2 = document.getElementById("form-d2").value;
+      let b3 = document.getElementById("form-d3").value;
+      let b4 = document.getElementById("form-d4").value;
+      if (b1 && b2 && b3 && b4) {
+        fetch(`/insert/${b1}/${b2}/${b3}/${b4}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }).then(() => {
+          const value1 = document.getElementById(`ctrl-value-1`);
+          value1.textContent = parseInt(b1);
+
+          const value2 = document.getElementById(`ctrl-value-2`);
+          value2.textContent = parseInt(b2);
+
+          const value3 = document.getElementById(`ctrl-value-3`);
+          value3.textContent = parseInt(b3);
+
+          const value4 = document.getElementById(`ctrl-value-4`);
+          value4.textContent = parseInt(b4);
+          window.location.reload();
+        });
+      } else {
+        alert("Please fill all control inputs");
+      }
+    }
+
+    function updateButton(button, newText) {
+      button.textContent = newText;
+    }
+
+    function handleDelete() {
+      localStorage.clear();
+    }
+
+    for (let id = 1; id <= 4; id++) {
+      fetch(`/get_state/c${id}`)
+        .then((response) => response.text())
+        .then((data) => {
+          const button = document.getElementById(`button-c${id}`);
+          console.log("data: ", data);
+          if (parseInt(data) === 1) {
+            console.log("button: ON");
+            button.className = "on-button";
+            button.textContent = "ON";
+          } else {
+            console.log("button: OFF");
+            button.className = "off-button";
+            button.textContent = "OFF";
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching value:", error);
+        });
+    }
+
+    //update state
+    function updateState(id) {
+      fetch(`/updatestate/button=${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.text()) //be careful of {response.text()}
+        .then((newState) => {
+          const button = document.getElementById(`button-${id}`);
+          console.log(newState);
+          if (newState === "1") {
+            updateButton(button, "ON");
+            button.className = "on-button";
+          } else {
+            updateButton(button, "OFF");
+            button.className = "off-button";
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating state:", error);
+        });
+    }
+
+    function avg(id) {
+      let sum = 0;
+      let count = 0;
+      let fetchData = localStorage.getItem(`chartData-${id}`);
+      fetchData = JSON.parse(fetchData);
+      if (fetchData) {
+        for (let i = 0; i < fetchData.length; i++) {
+          sum += fetchData[i][1];
+          count++;
+        }
+      }
+      const average = sum / count;
+      console.log("average", average);
+      alert(`Average of Channel ${id}: ${average}`);
+      Email.send({
+        Host: "smtp.elasticemail.com",
+        Username: "omonjade.godsfavour@stu.cu.edu.ng",
+        // Password: "5E2558F76D06FDDE25EEFEAEEA0D9F5EA1E8",
+        To: "omonjade7@gmail.com",
+        From: "omonjade.godsfavour@stu.cu.edu.ng",
+        Subject: "Channel 4 URGENT: Short Circuit Fault Detected on Distribution Line",
+        Body: `The Average for Channel ${id} is ${average}`,
+      });
+    }
+
+    //Create Chart
+    function createChart(id, titleText, yAxisTitleText, dataPointIndex, col) {
+      let chartData = localStorage.getItem(`chartData-${id}`);
+      if (chartData) {
+        chartData = JSON.parse(chartData);
+      } else {
+        chartData = [];
+      }
+      const chart = new Highcharts.Chart({
+        chart: { renderTo: id },
+        title: { text: titleText },
+        series: [
+          {
+            showInLegend: false,
+            data: chartData,
+          },
+        ],
+        plotOptions: {
+          line: {
+            animation: false,
+            dataLabels: { enabled: true },
+          },
+          series: { color: col },
+        },
+        xAxis: {
+          type: "datetime",
+          dateTimeLabelFormats: { second: "%H:%M:%S" },
+        },
+        yAxis: { title: { text: yAxisTitleText } },
+        credits: { enabled: false },
+      });
+      setInterval(() => {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            const x = new Date().getTime();
+            const y = this.responseText;
+            //const y_strip = y.slice(1, -1);
+            const y_split = y.split(", ");
+            const y_plot = parseFloat(y_split[dataPointIndex]);
+
+            if (chart.series[0].data.length > 40) {
+              chart.series[0].addPoint([x, y_plot], true, true, true);
+            } else {
+              chart.series[0].addPoint([x, y_plot], true, false, true);
+            }
+            hartData = chart.series[0].data.map((point) => [point.x, point.y]);
+            localStorage.setItem(`chartData-${id}`, JSON.stringify(chartData));
+          }
+        };
+        xhttp.open("GET", "/data", true);
+        xhttp.send();
+      }, 5000);
+      return chart;
+    }
+
+    const c1 = createChart(
+      "c1",
+      "Channel 1",
+      "Current (A)",
+      1, //because id takes position zero
+      "#f2ad0c"
+    );
+
+    const c2 = createChart("c2", "Channel 2", "Current (A)", 2, "#16c5e0");
+
+    const c3 = createChart("c3", "Channel 3", "Current (A)", 3, "#e0103d");
+
+    const c4 = createChart("c4", "Channel 4", "Current (A)", 4, "#3610e0");
+
+    const v = createChart("v", "Voltage", "Voltage (V)", 5, "#faa2a2");
+
+    function showToast(message) {
+      // Create the toast element
+      var toast = document.createElement("div");
+      toast.classList.add("toast");
+      toast.innerText = message;
+
+      // Add the toast to the container
+      var container = document.getElementById("toast-container");
+      container.appendChild(toast);
+
+      // Show the toast
+      setTimeout(function () {
+        toast.classList.add("fade-in");
+      }, 100);
+
+      // Hide the toast
+      setTimeout(function () {
+        toast.classList.add("fade-out");
+      }, 3000);
+
+      // Remove the toast from the container
+      setTimeout(function () {
+        container.removeChild(toast);
+      }, 3300);
+    }
+  </script>
+</html>

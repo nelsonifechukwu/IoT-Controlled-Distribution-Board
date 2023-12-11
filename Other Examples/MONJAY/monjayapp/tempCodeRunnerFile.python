@@ -1,0 +1,16 @@
+class Tweet:
+    def __init__(self, message, time):
+        self.message = message
+        self.time = time
+
+    def __lt__(self, other):
+        return self.time < other.time
+        
+    def __contains__(self, word):
+        print("Yes it is")
+        #Implement the method
+
+tweet = Tweet("I just flushed my toilet", 30)
+
+if "flushed" in tweet:
+    pass

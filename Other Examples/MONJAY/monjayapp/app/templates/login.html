@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="{{ url_for('static', filename= 'css/login.css') }}"
+      rel="stylesheet"
+      type="text/css"
+      media="all"
+    />
+    <!-- <link rel="stylesheet" href="../static/css/login.css"> -->
+
+    <title>SMART DISTRIBUTION BOARD</title>
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <div class="alert_red">
+        <!-- <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> -->
+        {{ message }}
+      </div>
+      <script>
+        // Fade out the alert box after 3 seconds
+        setTimeout(function () {
+          var alertBox = document.querySelector(".alert_red");
+          alertBox.style.opacity = "0";
+          alertBox.style.transition = "opacity 1s ease-in-out";
+          setTimeout(function () {
+            alertBox.remove();
+          }, 1000);
+        }, 3000);
+      </script>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+    <!-- code here -->
+    <div class="card">
+      <form class="card-form" action="" method="post">
+        <div class="form-structor">
+          <div class="signup">
+            <h2 class="form-title" id="signup">Login to Dashboard</h2>
+            <div class="form-holder">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                class="username input"
+                placeholder="Username"
+              />
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="input"
+                placeholder="Password"
+              />
+            </div>
+            <button class="submit-btn">Login</button>
+          </div>
+          <div class="login slide-up">
+            <div class="center">
+              <h2 class="form-title" id="login">
+                <span> <p>&copy; Monjay Dashboard</p></span>
+              </h2>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

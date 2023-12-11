@@ -1,0 +1,264 @@
+body {
+  min-width: 400px;
+  height: 400px;
+  margin: 0 auto;
+  background-color: #545454;
+  font-family: Arial;
+  overflow-x: hidden;
+}
+
+h2 {
+  font-family: Arial;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.container-fluid {
+  display: grid;
+  max-width: 1300px;
+  margin: 0 auto;
+  grid-template-columns: repeat(2, 1fr); /* creates 2 columns of equal width */
+  grid-gap: 20px; /* adds a 10px gap between items */
+}
+
+.container {
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
+}
+
+.ctrl-container{
+  height: 30rem;
+  width: 40rem;
+  background-color: white;
+  padding-left: 20px;
+  border-radius: 10px;
+}
+
+
+h2.ctrl-header{
+  text-align: start;
+  font-weight: 500;
+  font-size: 1.8rem;
+}
+
+.ctrl-btn{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-left: 20px;
+  margin-top: -5px;
+}
+
+.ctrl-form{
+  display: flex;
+  flex-direction: column;
+  gap: 45px;
+  width: 100px;
+  margin-top: 9%;
+  margin-left: -80px;
+}
+
+.ctrl-value{
+  background-color: #7A7A7A;
+  padding: 10px;
+  border-radius: 4px;
+  color: white;
+  margin-left: 62px;
+}
+
+.ctrl-form-btn{
+  background: white;
+  /* background-position: 0px -401px; */
+  border: solid 1px #1b7cfc;
+  color: #1b7cfc;
+  height: 30px;
+  padding-bottom: 2px;
+  border-radius: 7px;
+  padding: 20px;
+  width: 120px;
+  cursor: pointer; 
+  line-height: 40%;  
+}
+
+.ctrl-form-btn:hover{
+  background-color: #1b7cfc;
+  color: white;
+}
+
+.btn-input{
+  border-radius: 7px;
+  border: solid 1px #7A7A7A;
+  height: 40px;
+  width: 100px;
+}
+
+.ctrl{
+  display: flex;
+  margin-right: auto;
+  line-height: 20%;
+  gap: -10px;
+  align-items: center;
+}
+
+
+.header{
+  display: flex;
+  justify-content: space-between;
+  height: 25px;
+  padding: 20px;
+  align-items: center;
+  background-color: white;
+  width: 100%;
+}
+
+.logo{
+  font-family: "Helvetica Neue",Helvetica,Arial;
+  font-size: 1.2em;
+
+}
+
+/* The alert message box */
+
+/* .alert_green {
+  background-color: #1ab336;
+  height: 30px;
+  min-width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  color: white;
+  margin-bottom: 5px;
+  font-size: 1em;
+} */
+
+.alert_green {
+  font-family: "Helvetica Neue",Helvetica,Arial;
+	background-color: #1ab336; /* Red */
+	color: white;
+	margin-bottom: 15px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 999; /* Make sure the floating container is on top of the other elements */
+	padding: 15px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.3);
+	font-size: 0.9em;
+  }
+
+/* The close button */
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* When moving the mouse over the close button */
+.closebtn:hover {
+  color: black;
+}
+
+/* BUTTON STYLES */
+.buttonstyle {
+  background: rgb(255, 255, 255);
+  background-position: 0px -401px;
+  border: solid 1px #880e0e;
+  color: #880e0e;
+  height: 30px;
+  margin-top: 15px;
+  padding-bottom: 2px;
+  border-radius: 7px;
+  padding: 20px;
+  width: 150px;
+  cursor: pointer;
+  line-height: 50%;
+}
+
+.logout{
+  background-color: #b51414;
+  background-position: 0px -401px;
+  border: solid 1px #b51414;
+  color: white;
+  height: 30px;
+  margin-top: 15px;
+  margin-left: 10px;
+  padding-bottom: 2px;
+  border-radius: 7px;
+  padding: 20px;
+  width: 150px;
+  cursor: pointer;
+  line-height: 50%;
+}
+
+.logout:hover{
+  background-color: #880e0e;
+}
+
+.off-button{
+    background: white;
+    /* background-position: 0px -401px; */
+    border: solid 1px #e3b04b;
+    color: #e3b04b;
+    height: 30px;
+    padding-bottom: 2px;
+    border-radius: 7px;
+    padding: 20px;
+    width: 120px;
+    cursor: pointer; 
+    line-height: 50%;  
+}
+
+.on-button{
+  background: white;
+  /* background-position: 0px -401px; */
+  border: solid 1px #26de51;
+  color: #26de51;
+  height: 30px;
+  padding-bottom: 2px;
+  border-radius: 7px;
+  padding: 20px;
+  width: 120px;
+  cursor: pointer; 
+  line-height: 50%;  
+}
+
+.fault-button{
+  background: white;
+  /* background-position: 0px -401px; */
+  border: solid 1px #1b7cfc;
+  color: #1b7cfc;
+  height: 30px;
+  padding-bottom: 2px;
+  border-radius: 7px;
+  padding: 20px;
+  width: 120px;
+  cursor: pointer; 
+  line-height: 20%;  
+}
+
+.off-button:hover{
+    background: #e3b04b;
+    color: white;
+}
+
+.fault-button:hover{
+  background: #1b7cfc;
+  color: white;
+}
+
+.on-button:hover{
+  background: #26de51;
+  color: white;
+}
+
+.buttonstyle:hover {
+  background: #880e0e;
+  background-position: 0px -501px;
+  color: white;
+}

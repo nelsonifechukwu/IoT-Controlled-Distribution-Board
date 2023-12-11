@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+ *, *:after, *:before {
+	 box-sizing: border-box;
+}
+ body {
+	 font-family: "DM Sans", sans-serif;
+	 line-height: 1.5;
+	 background-color: #f1f3fb;
+	 padding: 0 2rem;
+}
+ img {
+	 max-width: 100%;
+	 display: block;
+}
+ input {
+	 appearance: none;
+	 border-radius: 0;
+}
+ .card {
+	 margin: 2rem auto;
+	 display: flex;
+	 flex-direction: column;
+	 width: 100%;
+	 max-width: 425px;
+	 background-color: #fff;
+	 border-radius: 10px;
+	 box-shadow: 0 10px 20px 0 rgba(153, 153, 153, .25);
+	 padding: 0.75rem;
+	 
+}
+ .card-image {
+	 border-radius: 8px;
+	 overflow: hidden;
+	 padding-bottom: 65%;
+	 background: linear-gradient(0deg, rgba(0, 0, 0, 0.719), #00000060), url('https://img.freepik.com/free-photo/electrical-panel-electric-meter-circuit-breakers-electric-frequency-converter-motor-speed-controller-rework-station_627829-10694.jpg?w=740&t=st=1677974413~exp=1677975013~hmac=274db2c8aa25fafb3c7d82a77abf0217ff1c758e551794922e357cb7060dda12');
+	 background-repeat: no-repeat;
+	 background-size: 100%;
+	 background-position: 0 5%;
+	 position: relative;
+}
+ .card-heading {
+	 position: absolute;
+	 left: 10%;
+	 top: 15%;
+	 right: 10%;
+	 font-size: 1.75rem;
+	 font-weight: 700;
+	 color: #f6f6f6;
+	 line-height: 1.222;
+	 z-index: 2;
+}
+ .card-heading small {
+	 display: block;
+	 font-size: 0.75em;
+	 font-weight: 400;
+	 margin-top: 0.27em;
+}
+ .card-form {
+	 padding: 2rem 1rem 0;
+}
+ .input {
+	 display: flex;
+	 flex-direction: column-reverse;
+	 position: relative;
+	 padding-top: 1.5rem;
+}
+ .input + .input {
+	 margin-top: 1.5rem;
+}
+ .input-label {
+	 color: #8597a3;
+	 position: absolute;
+	 top: 1.5rem;
+	 transition: 0.25s ease;
+}
+ .input-field {
+	 border: 0;
+	 z-index: 1;
+	 background-color: transparent;
+	 border-bottom: 2px solid #eee;
+	 font: inherit;
+	 font-size: 1.125rem;
+	 padding: 0.25rem 0;
+}
+ .input-field:focus, .input-field:valid {
+	 outline: 0;
+	 border-bottom-color: #ed8e00;
+}
+ .input-field:focus + .input-label, .input-field:valid + .input-label {
+	 color: #ed8e00;
+	 transform: translateY(-1.5rem);
+}
+ .action {
+	 margin-top: 2rem;
+}
+ .action-button {
+	 font: inherit;
+	 font-size: 1.25rem;
+	 padding: 1em;
+	 width: 100%;
+	 font-weight: 500;
+	 background-color: #ed8e00;
+	 border-radius: 6px;
+	 color: #fff;
+	 border: 0;
+	 cursor: pointer;
+}
+
+.action-button:hover{
+	background-color: #c47602;
+}
+ .action-button:focus {
+	 outline: 0;
+}
+ .card-info {
+	 padding: 1rem 1rem;
+	 text-align: center;
+	 font-size: 0.875rem;
+	 color: #8597a3;
+}
+ .card-info a {
+	 display: block;
+	 color: #ed8e00;
+	 text-decoration: none;
+}
+
+.alert_green {
+	background-color: #1ab336; /* Red */
+	color: white;
+	margin-bottom: 15px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 999; /* Make sure the floating container is on top of the other elements */
+	padding: 15px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.3);
+	font-size: 0.9em;
+  }
+  
+  .alert_red {
+	background-color: #d40000; /* Red */
+	color: white;
+	margin-bottom: 15px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 999; /* Make sure the floating container is on top of the other elements */
+	padding: 15px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.3);
+	font-size: 0.9em;
+  }
+ 
+  /* The close button */
+.closebtn {
+	margin-left: 15px;
+	color: white;
+	font-weight: bold;
+	float: right;
+	font-size: 22px;
+	line-height: 20px;
+	cursor: pointer;
+	transition: 0.3s;
+  }
+  
+  /* When moving the mouse over the close button */
+  .closebtn:hover {
+	color: black;
+  }
